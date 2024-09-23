@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan')
 const cors = require('cors')
-
+require('dotenv').config()
 
 const app = express();
 
@@ -11,6 +11,8 @@ app.use(express.static('dist'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body :host'))
 app.use(cors())
 
+
+const Person = require('./models/person')
 
 //Data
 let persons = [
@@ -46,25 +48,41 @@ morgan.token('body', req => {
   return JSON.stringify(req.body)
 })
 
-const generateId = () => {
-    const idNumber = Math.round(Math.random() * 5000);
-    return String(idNumber);
-};
+// const generateId = () => {
+//     const idNumber = Math.round(Math.random() * 5000);
+//     return String(idNumber);
+// };
+
+// app.get('/api/persons', (request, response) => {
+//     response.json(persons);
+    
+// });
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons);
-    
-});
+    Person.find({}).then(persons => {
+      response.json(persons)
+    })
+  })
+
+// app.get('/api/persons/:id', (request, response) => {
+//     const id = request.params.id;
+//     const person = persons.find((person) => person.id === id);
+//     if (person) {
+//         response.json(person);
+//     } else {
+//         response.status(404).end();
+//     }
+// });
+
+
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id;
-    const person = persons.find((person) => person.id === id);
-    if (person) {
-        response.json(person);
-    } else {
-        response.status(404).end();
-    }
-});
+    Person.findById(request.params.id).then(person => {
+      response.json(person)
+    })
+  })
+
+
 
 app.get('/info', (request, response) => {
     let info = `
@@ -75,45 +93,98 @@ app.get('/info', (request, response) => {
     response.send(info);
 });
 
+// app.delete('/api/persons/:id', (request, response) => {
+//     const id = request.params.id;
+//     persons = persons.filter((person) => person.id !== id);
+
+//     response.status(204).end();
+// });
+
+
 app.delete('/api/persons/:id', (request, response) => {
     const id = request.params.id;
-    persons = persons.filter((person) => person.id !== id);
-
-    response.status(204).end();
-});
-
-app.post('/api/persons/', (request, response) => {
-    const body = request.body;
-
-    if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'name or number missing',
-        });
-    }
-
-    if (persons.map((p) => p.name).includes(body.name)) {
-        return response.status(400).json({
-            error: 'name must be unique',
-        });
-    }
-
-    const newPerson = {
-        name: body.name,
-        number: body.number,
-        id: generateId(),
-    };
+    Person.deleteOne({
+        _id: id
+    }).then(deletedPerson => {
+        response.json(deletedPerson)
+      })
+})
+    
+    
+    
+    
     
      
-    persons = persons.concat(newPerson);
+ 
+        
+    
+// app.post('/api/persons/', (request, response) => {
+//     const body = request.body;
+
+//     if (!body.name || !body.number) {
+//         return response.status(400).json({
+//             error: 'name or number missing',
+//         });
+//     }
+
+//     if (persons.map((p) => p.name).includes(body.name)) {
+//         return response.status(400).json({
+//             error: 'name must be unique',
+//         });
+//     }
+
+//     const newPerson = {
+//         name: body.name,
+//         number: body.number,
+//         id: generateId(),
+//     };
+    
+     
+//     persons = persons.concat(newPerson);
    
-    response.json(newPerson);
+//     response.json(newPerson);
 
   
   
 
-});
+// });
 
-const PORT = process.env.PORT || 3001
+
+
+
+
+app.post('/api/persons/', (request, response) => {
+    const body = request.body
+  
+    if (!body.name || !body.number) {
+                return response.status(400).json({
+                    error: 'name or number missing',
+                });
+            }
+        
+            if (persons.map((p) => p.name).includes(body.name)) {
+                return response.status(400).json({
+                    error: 'name must be unique',
+                });
+            }
+  
+    
+
+    const newPerson = new Person({
+        name: body.name,
+        number: body.number,
+      })
+  
+    newPerson.save().then(savedPerson => {
+      response.json(savedPerson)
+    })
+  })
+
+
+
+
+
+const PORT = process.env.PORT || 3002
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

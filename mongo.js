@@ -23,13 +23,13 @@
 // mongoose.connect(url)
 
 // const personSchema = new mongoose.Schema({
-   
+
 //   name: {
 //     type: String,
 //     minLength: 3,
 //     required: true
 //   },
-   
+
 //   number: {
 //     type: String,
 //     minLength: 8,
@@ -54,7 +54,7 @@
 // })
 
 
- 
+
 
 
 // if(!name || !password) {
@@ -67,15 +67,15 @@
 //       })
 
 
-      
+
 // } else {
 //     person.save().then(result => {
-//         console.log( `added ${name} number ${number} to phonebook` )    
+//         console.log( `added ${name} number ${number} to phonebook` )
 //         mongoose.connection.close()
 //       })
 
 
-      
+
 // }
 
 
